@@ -47,4 +47,14 @@ Your profile will depend on whether or not you had to make a new profile when co
 
 Now you are ready to start using Terraform. Be sure to name your new resources differently from any other resources created in our AWS Console. 
 
+## Initial Commands to run
+Once you are feeling comfortable with working in the state created, first run 
+``terraform init`` in this directory. This initializes terraform
+
+Next, make any changes to files or add files that you want to. Then, run the following command
+`` terraform plan -out tfplan.out ``
+This saves the planned output of the terraform script to and .out file. It should also tell you whether or not it's creating, destroying or changing any resources
+
+Finally, run `` terraform apply tfplan.out `` to apply your changes. This will make/change/destroy the resources you've specified in your AWS account. Please make sure you have cleared these changes with Allen before running this command!
+
 

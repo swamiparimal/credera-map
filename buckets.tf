@@ -16,3 +16,15 @@ resource "aws_s3_bucket" "mybucket"{
     enabled = true
   }
 }
+
+resource "aws_s3_bucket" "ending_bucket"{
+  bucket = "ending-bucket"
+  tags = {
+    Name = "Staged Bucket"
+  }
+  acl = "private"
+
+  versioning {
+    enabled = true
+  }
+}
