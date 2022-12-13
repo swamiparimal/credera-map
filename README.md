@@ -55,6 +55,12 @@ Next, make any changes to files or add files that you want to. Then, run the fol
 `` terraform plan -out tfplan.out ``
 This saves the planned output of the terraform script to and .out file. It should also tell you whether or not it's creating, destroying or changing any resources
 
-Finally, run `` terraform apply tfplan.out `` to apply your changes. This will make/change/destroy the resources you've specified in your AWS account. Please make sure you have cleared these changes with Allen before running this command!
+Finally, run `` terraform apply tfplan.out `` to apply your changes. This will make/change/destroy the resources you've specified in your AWS account. Be sure and confident in your changes before running this command!
+
+## Pushing changes to the GitHub repository
+An issue I first encountered while trying to push my changes to the repo was encountering a git file size limit. This is due to the fact that some large files are created when you run ``terraform init``. To avoid this, manually check what files you are choosing to add to your 
+
+## Key Ideas to Consider
+There are already a good amount resources configured in the AWS account. To avoid modifying or accidentally destroying the current resources, name your new resource a unique name (and consider putting your initials at the end of the resource). Feel free to connect the present resources to any new Lambda functions, S3 buckets, Glue Crawlers, etc. but try and make sure that they are not altering the present resource.
 
 
