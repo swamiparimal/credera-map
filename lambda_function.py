@@ -10,26 +10,36 @@ from datetime import datetime
 import boto3
 
 def lambda_handler(event, context):
-    output = output_func()
+    last_file = str(grab_last_file())
     timestamp = str(datetime.now())
     filename = 'output-file' + timestamp + '.txt'
-    s3 = boto3.client('s3')
+    # s3c = boto3.client('s3')
+    s3 = boto3.resource('s3')
+    
+    new_name = timestamp + " " + last_file
 
-    s3.put_object(
-        Bucket='ending-bucket',
-        Key= filename,
-        Body=output,
-        ContentType='text/plain',
-    )
+    altering_file = s3.Object('tf-landing-bucket', last_file)
 
-    print("Lambda Function was triggered")
-    logger.info('## ENVIRONMENT VARIABLES')
-    logger.info(os.environ)
-    logger.info('## EVENT')
-    logger.info(event)
+    copy_source = {
+        'Bucket': 'tf-landing-bucket',
+        'Key': last_file
+    }
+    s3.meta.client.copy(copy_source, 'ending-bucket', new_name)
 
 
-def output_func():
-    timestamp = str(datetime.now())
-    s = "From S3 bucket through Lambda to staged S3 using triggers at " + timestamp
-    return s
+    # s3c.put_object(
+    #     Bucket='ending-bucket',
+    #     Key= filename,
+    #     Body=output,
+    #     ContentType='text/plain',
+    # )
+
+
+def grab_last_file():
+    s3 = boto3.resource('s3')
+    begin_bucket = s3.Bucket('tf-landing-bucket')
+    files = begin_bucket.objects.filter()
+    files = [obj.key for obj in sorted(files, key= lambda x: x.last_modified, reverse=True)]
+    print(files, type(files))
+    last_file = files[0]
+    return last_file
