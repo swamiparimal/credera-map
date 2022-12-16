@@ -13,11 +13,14 @@ data "aws_iam_policy_document" "policy" {
 
 ##Code here archives the Python file for the lambda function into a .zip
 provider "archive" {}
-data "archive_file" "zip" {
-  type        = "zip"
-  source_file = "lambda_function.py"
-  output_path = "lambda_function.zip"
+
+data "archive_file" "lambda_function_folder" {
+
+  type = "zip"
+  source_dir = "code_map"
+  output_path = "code_map.zip"
 }
+
 
 ##Creates an IAM role for the lambda function called "iam_for_lambda"
 resource "aws_iam_role" "iam_for_lambda" {
@@ -26,33 +29,25 @@ resource "aws_iam_role" "iam_for_lambda" {
 }
 
 
-##Original test function made at the beginning. It doesn't do anything really other than unzip a .zip
-# resource "aws_lambda_function" "test_lambda" {
-#   s3_bucket = "tf-landing-bucket"
-#   s3_key = "sampledata.zip"
-#   function_name = "terraform-test"
-#   handler = "module.handler"
-#   runtime = "python3.9"
-#   timeout = 180
-#   role = "arn:aws:iam::298041761968:role/map-iam-lambda"
-# }
-
 ##Logging function that grab the handler function from the Python file
-resource "aws_lambda_function" "logging_function" {
-  function_name = "logging_function"
-  filename = data.archive_file.zip.output_path
-  source_code_hash = data.archive_file.zip.output_base64sha256
+resource "aws_lambda_function" "converting_function" {
+  function_name = "convert_csv"
+  filename = "code_map.zip"
+  source_code_hash = data.archive_file.lambda_function_folder.output_base64sha256
   role = "arn:aws:iam::298041761968:role/map-iam-lambda"
   handler = "lambda_function.lambda_handler"
   runtime = "python3.9"
-
+  layers = ["arn:aws:lambda:us-east-2:298041761968:layer:pytz-layer:1",
+  "arn:aws:lambda:us-east-2:298041761968:layer:numpy-layer:1",
+  "arn:aws:lambda:us-east-2:336392948345:layer:AWSSDKPandas-Python39:2"]
+  timeout = 30
   
 }
 ##Lambda bucket permission
 resource "aws_lambda_permission" "allow_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = "arn:aws:lambda:us-east-2:298041761968:function:logging_function"
+  function_name = "arn:aws:lambda:us-east-2:298041761968:function:convert_csv"
   principal     = "s3.amazonaws.com"
   source_arn    = "arn:aws:s3:::tf-landing-bucket"
 }
@@ -62,7 +57,7 @@ resource "aws_s3_bucket_notification" "bucket_noticification"{
     bucket = "tf-landing-bucket"
 
     lambda_function {
-      lambda_function_arn = "arn:aws:lambda:us-east-2:298041761968:function:logging_function"
+      lambda_function_arn = "arn:aws:lambda:us-east-2:298041761968:function:convert_csv"
       events = ["s3:ObjectCreated:*"]
     }
     depends_on = [aws_lambda_permission.allow_bucket]
