@@ -62,3 +62,8 @@ resource "aws_s3_bucket_notification" "bucket_noticification"{
     }
     depends_on = [aws_lambda_permission.allow_bucket]
 }
+
+resource "aws_lambda_event_source_mapping" "attaching_sqs_to_lambda" {
+  event_source_arn = "arn:aws:sqs:us-east-2:298041761968:landingbucketsqs"
+  function_name    = "arn:aws:lambda:us-east-2:298041761968:function:convert_csv"
+}

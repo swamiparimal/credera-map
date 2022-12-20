@@ -17,6 +17,15 @@ resource "aws_s3_bucket" "mybucket"{
   }
 }
 
+resource "aws_s3_bucket_notification" "sqs_notification" {
+  bucket = "tf-landing-bucket"
+
+  queue {
+    queue_arn     = "arn:aws:sqs:us-east-2:298041761968:landingbucketsqs"
+    events        = ["s3:ObjectCreated:*"]
+    filter_suffix = ".log"
+  }
+}
 resource "aws_s3_bucket" "ending_bucket"{
   bucket = "ending-bucket"
   tags = {
