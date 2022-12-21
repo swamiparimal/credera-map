@@ -52,14 +52,15 @@ resource "aws_lambda_permission" "allow_bucket" {
   source_arn    = "arn:aws:s3:::tf-landing-bucket"
 }
 
+
 ##S3 bucket notification/trigger. It is linked to the logging lambda function
 resource "aws_s3_bucket_notification" "bucket_noticification"{
     bucket = "tf-landing-bucket"
-
-    lambda_function {
-      lambda_function_arn = "arn:aws:lambda:us-east-2:298041761968:function:convert_csv"
+    queue {
+      queue_arn = "arn:aws:sqs:us-east-2:298041761968:landingbucketsqs"
       events = ["s3:ObjectCreated:*"]
     }
+
     depends_on = [aws_lambda_permission.allow_bucket]
 }
 
